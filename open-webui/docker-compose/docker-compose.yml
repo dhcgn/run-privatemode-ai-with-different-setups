@@ -1,0 +1,37 @@
+services:
+  privatemode-proxy:
+    image: ghcr.io/edgelesssys/privatemode/privatemode-proxy:latest
+    restart: unless-stopped
+    command:
+      - --apiKey=${PM_API_KEY}
+      - --port=8080
+    ports:
+      - "8080:8080"
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main-slim
+    restart: unless-stopped
+    depends_on:
+      - privatemode-proxy
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui-data-single-user:/app/backend/data
+    environment:
+      # Disable persistent config so env vars are always applied
+      ENABLE_PERSISTENT_CONFIG: "False"
+      # Point Open WebUI at the privatemode-proxy
+      OPENAI_API_BASE_URL: http://privatemode-proxy:8080/v1
+      OPENAI_API_KEY: ${PM_API_KEY}
+      # Disable Ollama (not used here)
+      ENABLE_OLLAMA_API: "False"
+      # Default model
+      DEFAULT_MODELS: "kimi-latest"
+      # Disable authentication entirely (single-user local setup)
+      WEBUI_AUTH: "False"
+      # Disable all Hugging Face / internet downloads
+      OFFLINE_MODE: "True"
+      HF_HUB_OFFLINE: "1"
+
+volumes:
+  open-webui-data-single-user:

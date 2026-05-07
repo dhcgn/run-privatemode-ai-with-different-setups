@@ -21,8 +21,10 @@ while ($true) {
     Write-Host "  ...still waiting" -ForegroundColor DarkGray
 }
 
+$openUrl = "http://localhost:3000/?model=kimi-latest"
+
 Write-Host ""
 Write-Host "Open WebUI is ready at:" -ForegroundColor Green
-Write-Host "  $url" -ForegroundColor Yellow
+Write-Host "  $openUrl" -ForegroundColor Yellow
 Write-Host ""
-Start-Process $url
+Start-Process $openUrl

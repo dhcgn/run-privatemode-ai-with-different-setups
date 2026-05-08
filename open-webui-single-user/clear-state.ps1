@@ -1,5 +1,12 @@
+$composeDir = Join-Path $PSScriptRoot "docker-compose"
+
 Write-Host "Stopping containers and removing volumes..." -ForegroundColor Cyan
-docker compose down --volumes 2>&1 | Out-Null
+Push-Location $composeDir
+try {
+    docker compose down --volumes 2>&1 | Out-Null
+} finally {
+    Pop-Location
+}
 
 Write-Host "Removing volumes..." -ForegroundColor Cyan
 docker volume rm open-webui-data-single-user 2>&1 | Out-Null

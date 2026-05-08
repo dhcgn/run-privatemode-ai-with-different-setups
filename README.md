@@ -14,14 +14,14 @@ Privatemode.ai provides end-to-end encrypted AI inference. A local proxy verifie
 
 A single-user local chat UI backed by the Privatemode proxy.
 
-**Location:** `open-webui/docker-compose/`
+**Location:** `open-webui-single-user/docker-compose`
 
 **Features:**
 - No login required (single-user mode)
 - No Hugging Face / internet downloads (fully offline except for the Privatemode API)
 - Default model: `kimi-latest`
 
-**Prerequisites:** Docker, a [Privatemode API key](https://privatemode.ai)
+**Prerequisites:** Docker, a [Privatemode API key](https://portal.privatemode.ai/api-keys)
 
 **Usage:**
 
@@ -37,5 +37,3 @@ A single-user local chat UI backed by the Privatemode proxy.
    ```powershell
    .\clear-state.ps1
    ```
-
-

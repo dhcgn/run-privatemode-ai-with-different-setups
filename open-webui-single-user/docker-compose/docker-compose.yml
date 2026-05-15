@@ -13,19 +13,22 @@ services:
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:main-slim
+    container_name: open-webui
     restart: unless-stopped
     depends_on:
       - privatemode-proxy
+      - open-terminal
     ports:
       - "3000:8080"
     # Attach only to an internal network so this container cannot access the internet.
     networks:
       - app-internal
+      - webui-terminal
     volumes:
       - open-webui-data-single-user:/app/backend/data
     environment:
       # Disable persistent config so env vars are always applied
-      ENABLE_PERSISTENT_CONFIG: "False"
+      ENABLE_PERSISTENT_CONFIG: False
       # Point Open WebUI at the privatemode-proxy
       OPENAI_API_BASE_URL: http://privatemode-proxy:8080/v1
       OPENAI_API_KEY: ${PM_API_KEY}
@@ -35,24 +38,43 @@ services:
       AUDIO_STT_OPENAI_API_BASE_URL: http://privatemode-proxy:8080/v1
       AUDIO_STT_OPENAI_API_KEY: ${PM_API_KEY}
       # Disable Ollama (not used here)
-      ENABLE_OLLAMA_API: "False"
+      ENABLE_OLLAMA_API: False
       # Default model
       DEFAULT_MODELS: "kimi-latest"
       DEFAULT_PINNED_MODELS: "kimi-latest,gemma-4-31b,gpt-oss-120b"
       # Disable authentication entirely (single-user local setup)
-      WEBUI_AUTH: "False"
+      WEBUI_AUTH: False
       # Disable all Hugging Face / internet downloads
       OFFLINE_MODE: True
       HF_HUB_OFFLINE: 1
+      # Custom name for the web UI
       WEBUI_NAME: "Privatemode.ai Single User"
+      # Open Terminal
+      TERMINAL_SERVER_CONNECTIONS: "[{\"id\":\"unique-id\",\"url\":\"http://open-terminal:8000\",\"key\":\"your-secret-key\",\"name\":\"Dev Terminal\",\"auth_type\":\"bearer\",\"config\":{\"access_grants\":[]}}]"
+
+  open-terminal:
+    image: ghcr.io/open-webui/open-terminal
+    container_name: open-terminal
+    restart: unless-stopped
+    networks:
+      - webui-terminal
+    volumes:
+      - open-webui-data-single-user_open-terminal:/home/user
+    environment:
+      - OPEN_TERMINAL_API_KEY=your-secret-key
 
 volumes:
   open-webui-data-single-user:
+  open-webui-data-single-user_open-terminal:
 
 networks:
   # Internal network allows container-to-container traffic, but blocks outbound internet.
   app-internal:
-  # BUG not working yet with open-webui!
+  # BUG: Not working yet with open-webui! Should be able to use offline mode in the future.
   #  internal: true
   # Non-internal network for the proxy to reach the Privatemode API.
   proxy-egress:
+  # Dedicated network for open-webui <-> open-terminal communication.
+  webui-terminal:
+  # Uncomment to set the terminal offline
+  #   internal: true

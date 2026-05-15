@@ -1,6 +1,6 @@
 # run-privatemode-ai-with-different-setups
 
-Small collection of demo setups showing how to run [Privatemode.ai](https://privatemode.ai) by [Edgeless Systems](https://edgeless.systems).
+This repository contains a collection of demo setups for running [Privatemode.ai](https://privatemode.ai) by [Edgeless Systems](https://edgeless.systems) in different environments. Each setup demonstrates how to deploy and use Privatemode.ai securely and efficiently.
 
 > **For demonstration purposes only.**
 

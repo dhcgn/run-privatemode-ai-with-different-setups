@@ -10,6 +10,8 @@ try {
 
 Write-Host "Removing volumes..." -ForegroundColor Cyan
 docker volume rm open-webui-data-single-user 2>&1 | Out-Null
+docker volume rm open-webui-data-single-user_open-terminal 2>&1 | Out-Null
+
 
 Write-Host ""
 Write-Host "State cleared. Run .\start.ps1 to start fresh." -ForegroundColor Green

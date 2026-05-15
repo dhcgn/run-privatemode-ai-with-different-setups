@@ -1,8 +1,53 @@
-# open-webui-single-user
 
-## Optional: Speech-to-Text via privatemode-proxy
+# Open WebUI Single User Setup
 
-To route Open WebUI's OpenAI-compatible Speech-to-Text traffic through `privatemode-proxy`, add the following environment variables to the `open-webui` service in `docker-compose/docker-compose.yml`.
+
+This setup provides a secure, single-user instance of Open WebUI, integrated with Privatemode Proxy for end-to-end encrypted AI inference. It is designed for local use, with optional Speech-to-Text (STT) support and a built-in Open Terminal for code execution and automation.
+
+---
+
+**Note on Network Isolation:**
+
+Currently, it is not possible to run Open WebUI in a fully network-isolated manner. Setting the following in your `docker-compose.yml`:
+
+```yaml
+  app-internal:
+    internal: true
+```
+
+will not work yet with Open WebUI. This feature may be supported in the future.
+
+---
+
+---
+
+## Features
+
+- **End-to-end encrypted AI inference** via Privatemode Proxy
+- **Open WebUI**: Local chat UI with model selection
+- **Speech-to-Text (STT)**: Route OpenAI-compatible STT through Privatemode Proxy
+- **Open Terminal**: Secure, isolated shell access for code execution
+- **Offline mode**: No Hugging Face or internet downloads required (except Privatemode API)
+
+---
+
+## Quick Start
+
+1. Clone this repository and navigate to the `open-webui-single-user` directory.
+2. Copy `docker-compose/sample.env` to `docker-compose/.env` and set your Privatemode API key.
+3. Start the stack:
+
+   ```powershell
+   ./start.ps1
+   ```
+
+4. Open [http://localhost:3000/?model=kimi-latest](http://localhost:3000/?model=kimi-latest) in your browser.
+
+---
+
+## Speech-to-Text via Privatemode Proxy (Optional)
+
+To route Open WebUI's Speech-to-Text traffic through `privatemode-proxy`, add these environment variables to the `open-webui` service in `docker-compose/docker-compose.yml`:
 
 ```yaml
 AUDIO_STT_ENGINE: openai
@@ -11,13 +56,15 @@ AUDIO_STT_OPENAI_API_BASE_URL: http://privatemode-proxy:8080/v1
 AUDIO_STT_OPENAI_API_KEY: ${PM_API_KEY}
 ```
 
-These should sit alongside `OPENAI_API_BASE_URL` and `OPENAI_API_KEY` so both chat completions and STT use the same proxy endpoint.
+These should be placed alongside `OPENAI_API_BASE_URL` and `OPENAI_API_KEY` so both chat completions and STT use the same proxy endpoint.
 
 Reference: [Open WebUI Speech-to-Text OpenAI](https://docs.openwebui.com/reference/env-configuration/#speech-to-text-openai)
 
-## Models
+---
 
-> 15.05.2026
+## Supported Models
+
+> <https://docs.privatemode.ai/models/overview/>
 
 | Model                                                                                                    | Model ID                   | Type           | Input       | Context / limit | Endpoints                                                 |
 | -------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- | ----------- | --------------- | --------------------------------------------------------- |
@@ -30,24 +77,38 @@ Reference: [Open WebUI Speech-to-Text OpenAI](https://docs.openwebui.com/referen
 | [Voxtral Mini 3B](https://huggingface.co/mistralai/Voxtral-Mini-3B-2507)                                 | `voxtral-mini-3b`          | Speech-to-text | Audio       | 50 MB           | `/v1/audio/transcriptions`                                |
 | [Whisper large-v3](https://huggingface.co/openai/whisper-large-v3)                                       | `whisper-large-v3`         | Speech-to-text | Audio       | 50 MB           | `/v1/audio/transcriptions`                                |
 
-## Run
+---
 
-```plain
- .\start.ps1
-Pulling latest Docker images...
-[+] pull 2/2
- ✔ Image ghcr.io/edgelesssys/privatemode/privatemode-proxy:latest Pulled                                                                                                                                                                                                                                                                                 0.9s
- ✔ Image ghcr.io/open-webui/open-webui:main-slim                  Pulled                                                                                                                                                                                                                                                                                 2.7s
-Starting Privatemode Proxy + Open WebUI...
-[+] up 2/2
- ✔ Container docker-compose-privatemode-proxy-1 Started                                                                                                                                                                                                                                                                                                  0.3s
- ✔ Container docker-compose-open-webui-1        Started                                                                                                                                                                                                                                                                                                  0.2s
-Waiting for Open WebUI to become ready...
-  ...still waiting
-  ...still waiting
-  ...still waiting
-Open WebUI is ready and will open in your default browser in 1 second...                                                
+## Inspect Network Traffic
 
-Open WebUI is ready at:
-  http://localhost:3000/?model=kimi-latest
+To inspect container network traffic (for debugging):
+
+```powershell
+docker run --rm -it `
+  --net=container:docker-compose-open-webui-1 `
+  --cap-add=NET_ADMIN --cap-add=NET_RAW `
+  nicolaka/netshoot `
+  tcpdump -n -i eth0
 ```
+
+---
+
+## Open Terminal
+
+
+## Open Terminal Network Access
+
+By default, the `open-terminal` service has network access. You can restrict this by uncommenting the `internal: true` line under the `webui-terminal` network in your `docker-compose.yml`:
+
+```yaml
+  webui-terminal:
+    internal: true
+```
+
+This will prevent `open-terminal` from accessing the external network.
+
+---
+
+Open Terminal provides a real computing environment to Open WebUI. The AI can write and execute code, read output, fix errors, and iterate—all within the chat interface. It handles files, installs packages, runs servers, and returns results directly to you. Run it in a Docker container for isolation, or on bare metal for direct access to your machine.
+
+Learn more: [Open Terminal Documentation](https://docs.openwebui.com/features/open-terminal/)

@@ -7,6 +7,9 @@ services:
       - --port=8080
     ports:
       - "8080:8080"
+    networks:
+      - app-internal
+      - proxy-egress
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:main-slim
@@ -15,6 +18,9 @@ services:
       - privatemode-proxy
     ports:
       - "3000:8080"
+    # Attach only to an internal network so this container cannot access the internet.
+    networks:
+      - app-internal
     volumes:
       - open-webui-data-single-user:/app/backend/data
     environment:
@@ -23,15 +29,30 @@ services:
       # Point Open WebUI at the privatemode-proxy
       OPENAI_API_BASE_URL: http://privatemode-proxy:8080/v1
       OPENAI_API_KEY: ${PM_API_KEY}
+      # Route Speech-to-Text (OpenAI-compatible) through the same proxy
+      AUDIO_STT_ENGINE: openai
+      AUDIO_STT_MODEL: whisper-large-v3
+      AUDIO_STT_OPENAI_API_BASE_URL: http://privatemode-proxy:8080/v1
+      AUDIO_STT_OPENAI_API_KEY: ${PM_API_KEY}
       # Disable Ollama (not used here)
       ENABLE_OLLAMA_API: "False"
       # Default model
       DEFAULT_MODELS: "kimi-latest"
+      DEFAULT_PINNED_MODELS: "kimi-latest,gemma-4-31b,gpt-oss-120b"
       # Disable authentication entirely (single-user local setup)
       WEBUI_AUTH: "False"
       # Disable all Hugging Face / internet downloads
-      OFFLINE_MODE: "True"
-      HF_HUB_OFFLINE: "1"
+      OFFLINE_MODE: True
+      HF_HUB_OFFLINE: 1
+      WEBUI_NAME: "Privatemode.ai Single User"
 
 volumes:
   open-webui-data-single-user:
+
+networks:
+  # Internal network allows container-to-container traffic, but blocks outbound internet.
+  app-internal:
+  # BUG not working yet with open-webui!
+  #  internal: true
+  # Non-internal network for the proxy to reach the Privatemode API.
+  proxy-egress:

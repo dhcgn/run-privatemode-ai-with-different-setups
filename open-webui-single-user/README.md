@@ -1,8 +1,13 @@
-
 # Open WebUI Single User Setup
 
-
 This setup provides a secure, single-user instance of Open WebUI, integrated with Privatemode Proxy for end-to-end encrypted AI inference. It is designed for local use, with optional Speech-to-Text (STT) support and a built-in Open Terminal for code execution and automation.
+
+All AI inference traffic is routed through Privatemode Proxy, and is securely encrypted end-to-end and isolated in a trusted execution environment. So at no point does your data get exposesd to anyone including the model provider.
+
+> Set the API key in `docker-compose/.env`, go to <https://portal.privatemode.ai/> to create one.
+> And then just run: `./start.ps1` and open [http://localhost:3000/?model=kimi-latest](http://localhost:3000/?model=kimi-latest) to get started.
+
+<img src="_assets/screenshot-openweb-ui-privatemode-ai.png" alt="Open WebUI with Privatemode AI" />
 
 ---
 
@@ -15,9 +20,7 @@ Currently, it is not possible to run Open WebUI in a fully network-isolated mann
     internal: true
 ```
 
-will not work yet with Open WebUI. This feature may be supported in the future.
-
----
+will not work yet with Open WebUI. This feature may be supported hopefully in the future.
 
 ---
 

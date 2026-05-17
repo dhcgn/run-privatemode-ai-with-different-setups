@@ -5,8 +5,9 @@ services:
     command:
       - --apiKey=${PM_API_KEY}
       - --port=8080
-    ports:
-      - "8080:8080"
+# Uncomment the following lines to expose the proxy API on localhost:8080 (not recommended for production)      
+#     ports:
+#       - "8080:8080"
     networks:
       - app-internal
       - proxy-egress
